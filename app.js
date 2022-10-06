@@ -22,7 +22,6 @@ app.get("/", async (request, response) => {
   const dueToday = await Todo.dueToday();
   const dueLater = await Todo.dueLater();
   const completed = await Todo.completed();
-  console.log(overdue);
   if (request.accepts("html")) {
     response.render("index", {
       title: "Todo application",
