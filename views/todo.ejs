@@ -9,7 +9,7 @@
     <div class="flex items-center w-fit my-2 px-2 py-1 rounded hover:bg-purple-50">
       <% if(!data[i].completed){ %>
       <input id="todo-checkbox-<%= data[i].id %>" type="checkbox" %>
-      onclick="updateTodo(<%= data[i].id %>, <%= !data[i].completed %>)" class="w-4 h-4
+      onclick="updateTodo(<%= data[i].id %>)" class="w-4 h-4
       text-blue-600 bg-gray-100 rounded border-gray-300">
       <% } %>
 
