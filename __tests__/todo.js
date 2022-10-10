@@ -71,6 +71,7 @@ describe("List the todo items", function () {
       .put(`/todos/${latestTodo.id}`)
       .send({
         _csrf: csrfToken,
+        completed: true,
       });
     const parsedUpdateResponse = JSON.parse(markCompleteResponse.text);
     expect(parsedUpdateResponse.completed).toBe(true);
