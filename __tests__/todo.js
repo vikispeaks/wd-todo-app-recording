@@ -1,7 +1,7 @@
 var cheerio = require("cheerio");
 const request = require("supertest");
 
-const { sequelize } = require("../models/index");
+const { sequelize } = require("../models");
 const app = require("../app");
 
 let server, agent;
