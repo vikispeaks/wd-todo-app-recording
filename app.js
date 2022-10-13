@@ -36,6 +36,7 @@ app.get("/", async (request, response) => {
       overdue,
       dueToday,
       dueLater,
+      completed,
     });
   }
 });

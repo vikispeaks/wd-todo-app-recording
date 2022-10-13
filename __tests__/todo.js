@@ -1,7 +1,7 @@
 var cheerio = require("cheerio");
 const request = require("supertest");
 
-const db = require("../models/index");
+const { sequelize } = require("../models/index");
 const app = require("../app");
 
 let server, agent;
@@ -13,12 +13,12 @@ function extractCsrfToken(res) {
 
 describe("List the todo items", function () {
   beforeAll(async () => {
-    await db.sequelize.sync({ force: true });
+    await sequelize.sync({ force: true });
     server = app.listen(3000, () => {});
   });
 
   afterAll(async () => {
-    await db.sequelize.close();
+    await sequelize.close();
     server.close();
   });
 
@@ -31,6 +31,7 @@ describe("List the todo items", function () {
     expect(parsedResponse.overdue).toBeDefined();
     expect(parsedResponse.dueLater).toBeDefined();
     expect(parsedResponse.dueToday).toBeDefined();
+    expect(parsedResponse.completed).toBeDefined();
   });
 
   test("create a new todo", async () => {
@@ -75,5 +76,32 @@ describe("List the todo items", function () {
       });
     const parsedUpdateResponse = JSON.parse(markCompleteResponse.text);
     expect(parsedUpdateResponse.completed).toBe(true);
+  });
+
+  test("Delete a todo", async () => {
+    agent = request.agent(server);
+    const res = await agent.get("/");
+    const csrfToken = extractCsrfToken(res);
+    await agent.post("/todos").send({
+      _csrf: csrfToken,
+      title: "Buy milk",
+      dueDate: new Date().toISOString(),
+      completed: false,
+    });
+
+    const groupedTodosResponse = await agent
+      .get("/")
+      .set("Accept", "application/json");
+    const parsedGroupedResponse = JSON.parse(groupedTodosResponse.text);
+
+    expect(parsedGroupedResponse.dueToday).toBeDefined();
+
+    const dueTodayCount = parsedGroupedResponse.dueToday.length;
+    const latestTodo = parsedGroupedResponse.dueToday[dueTodayCount - 1];
+
+    const deletedResponse = await agent.delete(`/todos/${latestTodo.id}`).send({
+      _csrf: csrfToken,
+    });
+    expect(deletedResponse.statusCode).toBe(200);
   });
 });
