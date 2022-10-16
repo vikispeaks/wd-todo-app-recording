@@ -1,7 +1,7 @@
 // var cheerio = require("cheerio");
 const request = require("supertest");
 
-const db = require("../models/index");
+const { sequelize } = require("../models");
 const app = require("../app");
 
 let server, agent;
@@ -13,12 +13,12 @@ let server, agent;
 
 describe("List the todo items", function () {
   beforeAll(async () => {
-    await db.sequelize.sync({ force: true });
+    await sequelize.sync({ force: true });
     server = app.listen(3000, () => {});
   });
 
   afterAll(async () => {
-    await db.sequelize.close();
+    await sequelize.close();
     server.close();
   });
 
