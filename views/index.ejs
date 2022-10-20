@@ -16,14 +16,13 @@
     function updateTodo(id, completionStatus) {
 
       fetch(`/todos/${id}`, {
-        credentials: 'same-origin',
         method: 'put',
         headers: {
           'Content-Type': 'application/json',
-          'CSRF-Token': token
         },
         body: JSON.stringify({
-          completed: completionStatus
+          completed: completionStatus,
+          "_csrf": token
         })
       }).then((res) => {
         window.location.reload(true);
@@ -34,12 +33,13 @@
       console.log(id);
 
       fetch(`/todos/${id}`, {
-        credentials: 'same-origin',
         method: 'delete',
         headers: {
           'Content-Type': 'application/json',
-          'CSRF-Token': token
         },
+        body: JSON.stringify({
+          "_csrf": token
+        })
       }).then((res) => {
         window.location.reload();
       }).catch(err => console.error(err))
