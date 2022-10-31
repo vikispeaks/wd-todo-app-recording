@@ -2,9 +2,8 @@ const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
 var cookieParser = require("cookie-parser");
+var csrf = require("tiny-csrf");
 const path = require("path");
-var csrf = require("csurf");
-
 const passport = require("passport");
 const connectEnsureLogin = require("connect-ensure-login");
 const session = require("express-session");
@@ -20,8 +19,9 @@ app.set("view engine", "ejs");
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(csrf({ cookie: true }));
+app.use(cookieParser("shh! some secret string"));
+// app.use(csrf({ cookie: true }))
+app.use(csrf("this_should_be_32_character_long", ["POST", "PUT", "DELETE"]));
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use(
@@ -87,10 +87,11 @@ app.get(
   "/todos",
   connectEnsureLogin.ensureLoggedIn(),
   async (request, response) => {
-    const overdue = await Todo.overdue();
-    const dueToday = await Todo.dueToday();
-    const dueLater = await Todo.dueLater();
-    const completed = await Todo.completed();
+    const loggedInUser = request.user.id;
+    const overdue = await Todo.overdue(loggedInUser);
+    const dueToday = await Todo.dueToday(loggedInUser);
+    const dueLater = await Todo.dueLater(loggedInUser);
+    const completed = await Todo.completed(loggedInUser);
     if (request.accepts("html")) {
       response.render("todos", {
         title: "Todo application",
@@ -105,6 +106,7 @@ app.get(
         overdue,
         dueToday,
         dueLater,
+        completed,
       });
     }
   }
@@ -172,8 +174,9 @@ app.post(
       await Todo.addTodo({
         title: request.body.title,
         dueDate: request.body.dueDate,
+        userId: request.user.id,
       });
-      return response.redirect("/");
+      return response.redirect("/todos");
     } catch (error) {
       console.log(error);
       return response.status(422).json(error);
@@ -206,7 +209,7 @@ app.delete(
   connectEnsureLogin.ensureLoggedIn(),
   async (request, response) => {
     try {
-      await Todo.remove(request.params.id);
+      await Todo.remove(request.params.id, request.user.id);
       return response.json({ success: true });
     } catch (error) {
       return response.status(422).json(error);
