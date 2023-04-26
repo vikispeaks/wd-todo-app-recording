@@ -1,16 +1,39 @@
-# EmailEngine blueprint for Render.com
-# Use the following repository address when setting up a new blueprint application:
-#   https://github.com/postalsys/emailengine
-
 services:
-    # Web service
-    - type: web
-      name: testrender
-      env: node
-      buildCommand: npm install && NODE_ENV=production npx sequelize-cli db:migrate
-      startCommand: node index.js
-      envVars:
-          key: DATABASE_URL
-          fromDatabase:
-            name: tempdb_n7nd
-            property: postgres://tempdb_n7nd_user:sKL0LSUUkUdjzH5nTm0GvKnmc4LMCSpq@dpg-ch4npppjvhthrjkijcmg-a/tempdb_n7nd
+  # Node.js web service
+  - type: web
+    name: node-app
+    region: us-west # Update to your desired region
+    repo: https://github.com/vikispeaks/wd-todo-app-recording.git
+    env: node
+    plan: starter # Update to your desired instance type
+    rootDir: app
+    buildCommand: npm install && NODE_ENV=production npx sequelize-cli db:migrate
+    startCommand: node index.js
+    healthCheckPath: /
+    envVars:
+      - key: PORT
+        value: 3000 # Update to your desired port number
+      - key: DATABASE_URL
+        fromDatabase:
+          name: my-postgres-db
+          property: connectionString
+      - key: SESSION_SECRET
+        generateValue: true
+
+databases:
+  # Postgres database
+  - name: my-postgres-db
+    plan: starter # Update to your desired instance type
+    disk:
+      name: data
+      mountPath: /var/lib/postgresql/data/pgdata
+
+envVarGroups:
+  - name: db-settings
+    envVars:
+      - key: PGUSER
+        value: testuser # Update to your desired Postgres username
+      - key: PGPASSWORD
+        generateValue: true
+      - key: PGDATABASE
+        value: testdb # Update to your desired Postgres database name
