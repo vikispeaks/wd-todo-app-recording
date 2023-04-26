@@ -1,0 +1,30 @@
+build:
+  - name: node
+    env: nodejs-14
+    cmd: |
+      npm install && NODE_ENV=production npx sequelize-cli db:migrate
+
+  - name: postgres
+    env: postgresql-13
+
+run:
+  - name: web
+    env: nodejs-14
+    cmd: node index.js
+
+services:
+  - name: postgres
+    env: postgresql-13
+    plan: starter
+    # configure your Postgres database here
+    config:
+      POSTGRES_USER: tempdb_n7nd_user
+      POSTGRES_PASSWORD: tempdb_n7nd
+      POSTGRES_DB: tempdb_n7nd
+
+routes:
+  - src: /.*
+    dest: web:3000
+
+env:
+  NODE_ENV: production
