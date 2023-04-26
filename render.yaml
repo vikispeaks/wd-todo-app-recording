@@ -3,6 +3,7 @@ services:
   - type: web
     name: node-app
     region: us-west # Update to your desired region
+    repo: https://github.com/vikispeaks/wd-todo-app-recording.git
     env: node
     plan: starter # Update to your desired instance type
     rootDir: app
@@ -22,7 +23,6 @@ services:
 databases:
   # Postgres database
   - name: my-postgres-db
-    plan: starter # Update to your desired instance type
 
 envVarGroups:
   - name: db-settings
