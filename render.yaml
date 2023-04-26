@@ -24,9 +24,6 @@ databases:
   # Postgres database
   - name: my-postgres-db
     plan: starter # Update to your desired instance type
-    disk:
-      name: data
-      mountPath: /var/lib/postgresql/data/pgdata
 
 envVarGroups:
   - name: db-settings
